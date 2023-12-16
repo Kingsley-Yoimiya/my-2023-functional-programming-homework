@@ -1,0 +1,89 @@
+\documentclass[UTF-8]{ctexart}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{tabularx}
+\usepackage{amssymb}
+\usepackage{amsthm}	
+
+\begin{document}
+
+Author: 尹锦润
+
+Student ID: 2300012929
+
+
+
+
+
+\section{BMF1-1}
+
+(1)
+
+If $\displaystyle ( \otimes c) \cdotp \oplus /=\oplus /\cdotp ( \otimes c) \ *\ $ holds, then according to the defination, \ $\displaystyle ( \otimes c) \cdotp \oplus /[ a,b] =\oplus /\cdotp ( \otimes c) \ *\ [ a,b]$ means $\displaystyle ( a\otimes b) \otimes c=( a\otimes c) \oplus ( b\otimes c)$.
+
+If $\displaystyle ( a\oplus b) \otimes c=( a\otimes c) \oplus ( b\otimes c)$ holds, then we can prove $\displaystyle ( \otimes c) \cdotp \oplus /=\oplus /\cdotp ( \otimes c) \ *\ .$ step by step:
+\begin{itemize}
+	\item $\displaystyle ( \otimes c) \cdotp \oplus /[] =[] ,\oplus /\cdotp ( \otimes c) \ *\ []$
+	\item $\displaystyle ( \otimes c) \cdotp \oplus /[ a] =a\otimes c,\oplus /\cdotp ( \otimes c) \ *\ [ a] =a\otimes c$
+	\item If x satisfied the rule $\displaystyle ( \otimes c) \cdotp \oplus /x=\oplus /\cdotp ( \otimes c) \ *\ x$ ,then
+	
+	$\displaystyle \begin{aligned}
+		& ( \otimes c) \cdotp \oplus /( x++[ a])\\
+		= & ( \otimes c) *(( \oplus /x) \oplus a)\\
+		& \{using\ ( a\oplus b) \otimes c=( a\otimes c) \oplus ( b\otimes c)\}\\
+		= & (( \otimes c) \cdotp \oplus /x) \oplus \ ( a\otimes c))
+	\end{aligned}$
+	
+	
+	
+	$\displaystyle \begin{aligned}
+		& \oplus /\cdotp ( \otimes c) \ *\ ( x++[ a])\\
+		= & ( \oplus /\cdotp ( \otimes c) \ *\ x) \oplus (( a\otimes c))\\
+		= & (( \otimes c) \cdotp \oplus /x) \oplus (( a\otimes c))
+	\end{aligned}$
+\end{itemize}
+
+so
+\begin{center}
+	$\displaystyle ( \otimes c) \cdotp \oplus /=\oplus /\cdotp ( \otimes c) \ *\ $ 
+\end{center}
+
+is equivalant to
+\begin{center}
+	$\displaystyle ( a\oplus b) \otimes c=( a\otimes c) \oplus ( b\otimes c)$
+	
+	
+	
+\end{center}
+(2)
+
+Because $\displaystyle f=\oplus /\cdotp \otimes /*\ tails=\odot \nrightarrow _{e}$ where $\displaystyle e=id_{\otimes } ,a\odot b=( a\otimes b) \oplus e$,then satisfiy the rules:
+\begin{equation*}
+	\begin{aligned}
+		f[] & =e\\
+		f( x++[ a]) & =\odot \nrightarrow _{\odot \nrightarrow _{e} \ x} a=f\ x\odot a
+	\end{aligned}
+\end{equation*}
+
+\section{BMF1-2}
+
+In the \texttt{mss.hs}.
+
+\section{BMF1-3}
+
+
+\begin{equation*}
+	\begin{aligned}
+		S= & \oplus /\cdotp f*\cdotp segs\\
+		= & \oplus /\cdotp f*\cdotp ++/\cdotp tails\ *\cdotp \ inits\\
+		= & \oplus /\cdotp ( \oplus /\cdotp f*\cdotp tails) *\cdotp \ inits\\
+		= & \oplus /\cdotp ( h\cdotp \odot \nrightarrow _{e}) *\cdotp inits\\
+		= & \oplus /\cdotp h*\odot \overline{\nrightarrow } \ e
+	\end{aligned}
+\end{equation*}
+(I can't write ⊙→// e) 
+
+\end{document}

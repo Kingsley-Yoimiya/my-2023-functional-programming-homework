@@ -1,0 +1,72 @@
+segs = concat ∘ map tails ∘ inits
+mss = maximum ∘ map sum ∘ segs
+mss = maximum ∘ map sum ∘ concat ∘ map tails ∘ inits
+
+map sum (foldr _++_ [] (map tails (scanl _++_ [] (map [_] xs)))) !=
+foldr _++_ []
+(map (map sum) (map tails (scanl _++_ [] (map [_] xs))))
+
+map (foldr _+_ 0)
+(foldr _++_ []
+ (map (λ x → scanr _++_ [] (map (λ x₁ → x₁ ∷ []) x))
+  (scanl _++_ [] (map (λ x → x ∷ []) xs))))
+!=
+foldr _++_ []
+(map (map (foldr _+_ 0))
+ (map (λ x → scanr _++_ [] (map (λ x₁ → x₁ ∷ []) x))
+  (scanl _++_ [] (map (λ x → x ∷ []) xs))))
+
+map (foldr _+_ 0)
+(foldr _++_ []
+ (map (λ x → scanr _++_ [] (map (λ x₁ → x₁ ∷ []) x))
+  (scanl _++_ [] (map (λ x → x ∷ []) xs))))
+!=
+foldr _++_ []
+(map (map (foldr _+_ 0))
+ (map (λ x → scanr _++_ [] (map (λ x₁ → x₁ ∷ []) x))
+  (scanl _++_ [] (map (λ x → x ∷ []) xs))))
+
+  -------------------------------
+(xs : List ℕ) →
+    foldr _⊔_ 0
+    (map (foldr _+_ 0)
+     (foldr _++_ []
+      (map (λ x → scanr _++_ [] (map (λ x₁ → x₁ ∷ []) x))
+       (scanl _++_ [] (map (λ x → x ∷ []) xs)))))
+    ≡ foldr _⊔_ 0 (scanl (λ x y → x + y ⊔ 0) 0 xs)
+
+(xs : List ℕ) →
+    foldr _⊔_ 0
+    (map (foldr _+_ 0)
+     (foldr _++_ []
+      (map (λ x → scanr _++_ [] (map (λ x₁ → x₁ ∷ []) x))
+       (scanl _++_ [] (map (λ x → x ∷ []) xs)))))
+    ≡ foldr _⊔_ 0 (scanl (λ x y → x + y ⊔ 0) 0 xs)
+
+foldr _⊔_ 0
+    (map (foldr _+_ 0)
+     (foldr _++_ []
+      (map (λ x → scanr _++_ [] (map (λ x₁ → x₁ ∷ []) x))
+       (scanl _++_ [] (map (λ x → x ∷ []) xs)))))
+    ≡ foldr _⊔_ 0 (scanl (λ x y → x + y ⊔ 0) 0 xs)
+
+foldr _⊔_ 0
+    (map (foldr _+_ 0)
+     (foldr _++_ []
+      (map (λ x → scanr _++_ [] (map (λ x₁ → x₁ ∷ []) x))
+       (scanl _++_ [] (map (λ x → x ∷ []) xs)))))
+    ≡ foldr _⊔_ 0 (scanl (λ x y → x + y ⊔ 0) 0 xs)
+?2
+  : foldr _⊔_ 0
+    (map (foldr _+_ 0)
+     (foldr _++_ []
+      (map (λ x → scanr _++_ [] (map (λ x₁ → x₁ ∷ []) x))
+       (scanl _++_ [] (map (λ x → x ∷ []) xs)))))
+    ≡ foldr _⊔_ 0 (scanl (λ x y → x + y ⊔ 0) 0 xs)
+?2
+  : foldr _⊔_ 0
+    (map (foldr _+_ 0)
+     (foldr _++_ []
+      (map (λ x → scanr _++_ [] (map (λ x₁ → x₁ ∷ []) x))
+       (scanl _++_ [] (map (λ x → x ∷ []) xs)))))
+    ≡ foldr _⊔_ 0 (scanl (λ x y → x + y ⊔ 0) 0 xs)

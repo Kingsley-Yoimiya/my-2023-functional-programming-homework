@@ -1,0 +1,5 @@
+*.agda~
+*.agdai
+*.aux
+*.log
+*.gz
