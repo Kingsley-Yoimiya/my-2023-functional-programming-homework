@@ -280,6 +280,14 @@ module MSS (
         (foldr _⊕_ e ∘ map (foldr _⊕_ e)) (x ∷ xs)
       ∎
   
+  R-Dist : ∀ {A : Set}
+             (_⊕_ : A → A → A)
+             (_⊗_ : A → A → A)
+           → Set
+  R-Dist {A} _⊕_ _⊗_ = ∀ (z x y : A) → (x ⊕ y) ⊗ z ≡ (x ⊗ z) ⊕ (y ⊗ z)
+
+-- ∀ (a b c : A) → (a ⊕ b) ⊗ c ≡ (a ⊗ c) ⊕ (b ⊗ c)
+  
   inits : ∀ {A : Set} → List A → List (List A)
   inits = scanl _++_ [] ∘ map [_]
 
@@ -298,18 +306,87 @@ module MSS (
   maximum : List ℕ → ℕ
   maximum = foldr _⊔_ 0
 
-  map-promotion : ∀{A B : Set} (f : A → B) 
-    → (map f) ∘ concat ≡ concat ∘ (map (map f))
-  map-promotion = {!!}
-  
-  mss : List ℕ → ℕ
-  mss = maximum ∘ map sum ∘ segs
-
   -- Did you know there are plenty of useful theorems in the standard library?
   open import Data.Nat.Properties using (+-distribˡ-⊔; +-distribʳ-⊔)
   -- +-distribˡ-⊔ : ∀ x y z → x + (y ⊔ z) ≡ (x + y) ⊔ (x + z)
   -- +-distribʳ-⊔ : ∀ z x y → (x ⊔ y) + z ≡ (x + z) ⊔ (y + z)
   
+  map-promotion : ∀{A B : Set} (f : A → B) 
+    → (map f) ∘ concat ≡ concat ∘ (map (map f))
+  map-promotion = {!!}
+  
+  horner-rule : ∀{A : Set}
+                (_⊕_ : A → A → A)
+                (e-⊕ : A)
+                (_⊗_ : A → A → A)
+                (e-⊗ : A)
+              → (p : IsMonoid e-⊕ _⊕_)
+              → (q : IsMonoid e-⊗ _⊗_)
+              → (rdist : R-Dist _⊕_ _⊗_)
+              → foldr _⊕_ e-⊕ ∘ map (foldr _⊗_ e-⊗) ∘ tails
+                ≡ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗
+  horner-rule _⊕_ e-⊕ _⊗_ e-⊗ p q rdist = extensionality(horner-rule-x _⊕_ e-⊕ _⊗_ e-⊗ p q rdist)
+    where
+      horner-rule-x : ∀{A : Set}
+                      (_⊕_ : A → A → A)
+                      (e-⊕ : A)
+                      (_⊗_ : A → A → A)
+                      (e-⊗ : A)
+                    → (p : IsMonoid e-⊕ _⊕_)
+                    → (q : IsMonoid e-⊗ _⊗_)
+                    → (rdist : R-Dist _⊕_ _⊗_)
+                    → (xs : List A)
+                    → (foldr _⊕_ e-⊕ ∘ map (foldr _⊗_ e-⊗) ∘ tails) xs
+                    ≡ (foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗) xs
+      horner-rule-x _⊕_ e-⊕ _⊗_ e-⊗ p q rdist [] =
+        begin
+          (foldr _⊕_ e-⊕ ∘ map (foldr _⊗_ e-⊗) ∘ tails) []
+        ≡⟨⟩
+          foldr _⊕_ e-⊕ (map (foldr _⊗_ e-⊗) [ [] ])
+        ≡⟨⟩
+          foldr _⊕_ e-⊕ [ e-⊗ ]
+        ≡⟨ identityʳ p e-⊗ ⟩
+          e-⊗
+        ≡⟨⟩
+          foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ []
+        ∎
+      horner-rule-x _⊕_ e-⊕ _⊗_ e-⊗ p q rdist (x ∷ xs) =
+        begin
+          (foldr _⊕_ e-⊕ ∘ map (foldr _⊗_ e-⊗) ∘ tails) (x ∷ xs)
+        ≡⟨ {!!} ⟩
+          (foldr _⊕_ e-⊕ ∘ map (foldr _⊗_ e-⊗)) ([ x ∷ xs ] ++ tails (xs))
+        ≡⟨⟩
+          foldr _⊕_ e-⊕ ((map (foldr _⊗_ e-⊗)) [ x ∷ xs ] ++
+          (map (foldr _⊗_ e-⊗) ∘ tails) (xs))
+        ≡⟨ {!!} ⟩
+          foldr _⊕_ e-⊕ (map (foldr _⊗_ e-⊗) [ x ∷ xs ]) ⊗
+          foldr _⊕_ e-⊕ ((map (foldr _⊗_ e-⊗) ∘ tails) (xs))
+        ≡⟨ cong ((foldr _⊕_ e-⊕ (map (foldr _⊗_ e-⊗) [ x ∷ xs ])) ⊗_)
+           (horner-rule-x _⊕_ e-⊕ _⊗_ e-⊗ p q rdist xs) ⟩
+        ----------
+          foldr _⊕_ e-⊕ (map (foldr _⊗_ e-⊗) [ x ∷ xs ]) ⊗
+          foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
+        ≡⟨⟩
+          foldr _⊕_ e-⊕ [ foldr _⊗_ e-⊗ (x ∷ xs) ] ⊗
+          foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
+        ≡⟨ refl ⟩
+          ((foldr _⊗_ e-⊗ (x ∷ xs)) ⊕ e-⊕)⊗
+          foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
+        ≡⟨ cong (_⊗ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs))
+           (identityʳ p (foldr _⊗_ e-⊗ (x ∷ xs))) ⟩
+          (foldr _⊗_ e-⊗ (x ∷ xs)) ⊗
+          foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
+        ≡⟨ {!!} ⟩
+          foldl (λ a b → (a ⊗ b) ⊕ e-⊗) (x ⊕ e-⊗) xs
+        ≡⟨ cong (λ t → foldl (λ a b → (a ⊗ b) ⊕ e-⊗) (t ⊕ e-⊗) xs) (sym(identityˡ q x)) ⟩
+          foldl (λ a b → (a ⊗ b) ⊕ e-⊗) ((λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ x) xs
+        ≡⟨⟩
+          foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (x ∷ xs)
+        ∎
+  
+  mss : List ℕ → ℕ
+  mss = maximum ∘ map sum ∘ segs
+
   maxadd : ℕ → ℕ → ℕ
   maxadd x y = (x + y) ⊔ 0
   
@@ -330,7 +407,7 @@ module MSS (
       maximum ∘ map maximum ∘ map (map sum ∘ tails) ∘ inits
     ≡⟨ cong (λ x → maximum ∘ x ∘ inits) (map-compose (map sum ∘ tails) maximum) ⟩
       maximum ∘ map (maximum ∘ map sum ∘ tails) ∘ inits
-    ≡⟨ {!!} ⟩
+    ≡⟨ cong (λ x → maximum ∘ map x ∘ inits) (horner-rule _⊔_ 0 _+_ 0 monoid.ℕ-⊔-is-monoid monoid.ℕ-add-is-monoid +-distribʳ-⊔) ⟩
       maximum ∘ map (foldl maxadd 0) ∘ inits
     ≡⟨ {!!} ⟩
       maximum ∘ (scanl maxadd 0)
