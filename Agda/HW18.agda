@@ -354,15 +354,15 @@ module MSS (
       foldl (λ a b → (a ⊗ b) ⊕ e-⊗) (((t ⊗ x) ⊕ (e-⊗ ⊗ x)) ⊕ e-⊗) xs
     ≡⟨ l-trans-rule _⊕_ e-⊕ _⊗_ e-⊗ p q rdist ((t ⊗ x) ⊕ (e-⊗ ⊗ x)) xs ⟩
       foldr _⊗_ e-⊗ (((t ⊗ x) ⊕ (e-⊗ ⊗ x)) ∷ xs) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
-    ≡⟨ {!!} ⟩
+    ≡⟨ cong (λ yy → (foldr _⊗_ e-⊗ (yy ∷ xs) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs))) (sym(rdist x t e-⊗)) ⟩
       foldr _⊗_ e-⊗ (((t ⊕ e-⊗) ⊗ x) ∷ xs) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
     ≡⟨⟩
       (((t ⊕ e-⊗) ⊗ x) ⊗ foldr _⊗_ e-⊗ (xs)) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
-    ≡⟨ {!!} ⟩
+    ≡⟨ cong (λ yy → ((yy) ⊗ foldr _⊗_ e-⊗ (xs)) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)) (rdist x t e-⊗) ⟩
       (((t ⊗ x) ⊕ (e-⊗ ⊗ x)) ⊗ foldr _⊗_ e-⊗ (xs)) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
-    ≡⟨ {!!} ⟩
+    ≡⟨ cong (λ yy → ((((t ⊗ x) ⊕ yy) ⊗ foldr _⊗_ e-⊗ (xs)) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs))) (identityˡ q x)⟩
       (((t ⊗ x) ⊕ x) ⊗ foldr _⊗_ e-⊗ (xs)) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
-    ≡⟨ {!!} ⟩
+    ≡⟨ cong(_⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs))(rdist (foldr _⊗_ e-⊗ (xs)) (t ⊗ x) x)⟩
       (((t ⊗ x) ⊗ foldr _⊗_ e-⊗ (xs)) ⊕ (x ⊗ foldr _⊗_ e-⊗ (xs))) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
     ≡⟨ cong (λ yy → (yy ⊕ (x ⊗ foldr _⊗_ e-⊗ (xs))) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)) (assoc (IsMonoid.is-semigroup q)  t x (foldr _⊗_ e-⊗ (xs))) ⟩
       ((t ⊗ (x ⊗ foldr _⊗_ e-⊗ (xs))) ⊕ (x ⊗ foldr _⊗_ e-⊗ (xs))) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
@@ -372,10 +372,18 @@ module MSS (
       (((foldr _⊗_ e-⊗ ((t ∷ x ∷ xs)))) ⊕ (foldr _⊗_ e-⊗ (x ∷ xs)))
       ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
     ------
-    ≡⟨ {!!} ⟩
-      (((foldr _⊗_ e-⊗ ((t ∷ x ∷ xs)))) ⊕ (foldl _⊗_ e-⊗ (x ∷ xs)))
-      ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
-    ≡⟨ {!!} ⟩
+    ≡⟨ assoc (is-semigroup p) (t ⊗ (x ⊗ foldr _⊗_ e-⊗ xs))
+         (x ⊗ foldr _⊗_ e-⊗ xs) (foldl (λ z z₁ → (z ⊗ z₁) ⊕ e-⊗) e-⊗ xs) ⟩
+      ((foldr _⊗_ e-⊗ ((t ∷ x ∷ xs)))) ⊕ ((foldr _⊗_ e-⊗ (x ∷ xs))
+      ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs))
+    ≡⟨ refl ⟩
+      ((foldr _⊗_ e-⊗ ((t ∷ x ∷ xs)))) ⊕ ((foldr _⊗_ e-⊗ (x ∷ xs))
+      ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs))
+    ≡⟨ cong(((foldr _⊗_ e-⊗ ((t ∷ x ∷ xs)))) ⊕_) (sym(l-trans-rule _⊕_ e-⊕ _⊗_ e-⊗ p q rdist x xs))⟩
+      (foldr _⊗_ e-⊗ (t ∷ (x ∷ xs))) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) (x ⊕ e-⊗) (xs)
+    ≡⟨ cong(λ yy → (foldr _⊗_ e-⊗ (t ∷ (x ∷ xs))) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) (yy ⊕ e-⊗) (xs)) (sym(identityˡ q x)) ⟩
+      (foldr _⊗_ e-⊗ (t ∷ (x ∷ xs))) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) ((e-⊗ ⊗ x) ⊕ e-⊗) (xs)
+    ≡⟨⟩
       (foldr _⊗_ e-⊗ (t ∷ (x ∷ xs))) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (x ∷ xs)
     ∎
   
