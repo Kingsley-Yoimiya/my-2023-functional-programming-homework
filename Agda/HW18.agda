@@ -345,7 +345,39 @@ module MSS (
     ≡⟨⟩
       (foldr _⊗_ e-⊗ (t ∷ [])) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ []
     ∎
-  l-trans-rule _⊕_ e-⊕ _⊗_ e-⊗ p q rdist t (x ∷ xs) = {!!}
+  l-trans-rule {A} _⊕_ e-⊕ _⊗_ e-⊗ p q rdist t (x ∷ xs) =
+    begin
+      foldl (λ a b → (a ⊗ b) ⊕ e-⊗) (t ⊕ e-⊗) (x ∷ xs)
+    ≡⟨⟩
+      foldl (λ a b → (a ⊗ b) ⊕ e-⊗) (((t ⊕ e-⊗) ⊗ x) ⊕ e-⊗) xs
+    ≡⟨ cong (λ yy → foldl (λ a b → (a ⊗ b) ⊕ e-⊗) (yy ⊕ e-⊗) xs) (rdist x t e-⊗) ⟩
+      foldl (λ a b → (a ⊗ b) ⊕ e-⊗) (((t ⊗ x) ⊕ (e-⊗ ⊗ x)) ⊕ e-⊗) xs
+    ≡⟨ l-trans-rule _⊕_ e-⊕ _⊗_ e-⊗ p q rdist ((t ⊗ x) ⊕ (e-⊗ ⊗ x)) xs ⟩
+      foldr _⊗_ e-⊗ (((t ⊗ x) ⊕ (e-⊗ ⊗ x)) ∷ xs) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
+    ≡⟨ {!!} ⟩
+      foldr _⊗_ e-⊗ (((t ⊕ e-⊗) ⊗ x) ∷ xs) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
+    ≡⟨⟩
+      (((t ⊕ e-⊗) ⊗ x) ⊗ foldr _⊗_ e-⊗ (xs)) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
+    ≡⟨ {!!} ⟩
+      (((t ⊗ x) ⊕ (e-⊗ ⊗ x)) ⊗ foldr _⊗_ e-⊗ (xs)) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
+    ≡⟨ {!!} ⟩
+      (((t ⊗ x) ⊕ x) ⊗ foldr _⊗_ e-⊗ (xs)) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
+    ≡⟨ {!!} ⟩
+      (((t ⊗ x) ⊗ foldr _⊗_ e-⊗ (xs)) ⊕ (x ⊗ foldr _⊗_ e-⊗ (xs))) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
+    ≡⟨ cong (λ yy → (yy ⊕ (x ⊗ foldr _⊗_ e-⊗ (xs))) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)) (assoc (IsMonoid.is-semigroup q)  t x (foldr _⊗_ e-⊗ (xs))) ⟩
+      ((t ⊗ (x ⊗ foldr _⊗_ e-⊗ (xs))) ⊕ (x ⊗ foldr _⊗_ e-⊗ (xs))) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
+    ≡⟨⟩
+      ((t ⊗ (foldr _⊗_ e-⊗ ((x ∷ xs)))) ⊕ (x ⊗ foldr _⊗_ e-⊗ (xs))) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
+    ≡⟨⟩
+      (((foldr _⊗_ e-⊗ ((t ∷ x ∷ xs)))) ⊕ (foldr _⊗_ e-⊗ (x ∷ xs)))
+      ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
+    ------
+    ≡⟨ {!!} ⟩
+      (((foldr _⊗_ e-⊗ ((t ∷ x ∷ xs)))) ⊕ (foldl _⊗_ e-⊗ (x ∷ xs)))
+      ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
+    ≡⟨ {!!} ⟩
+      (foldr _⊗_ e-⊗ (t ∷ (x ∷ xs))) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (x ∷ xs)
+    ∎
   
   horner-rule _⊕_ e-⊕ _⊗_ e-⊗ p q rdist = extensionality(horner-rule-x _⊕_ e-⊕ _⊗_ e-⊗ p q rdist)
     where
