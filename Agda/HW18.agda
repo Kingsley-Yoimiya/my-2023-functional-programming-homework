@@ -74,6 +74,7 @@ module problem-2 where
   foldr-++ f e [] ys rewrite problem-1.++-identityˡ ys = refl
   foldr-++ f e (x ∷ xs) ys rewrite foldr-++ f e xs ys = refl
 
+    
 module problem-3 (
     extensionality : ∀ {A : Set} {B : A → Set}
         {f g : (x : A) → B x}
@@ -186,6 +187,47 @@ module MSS (
   open import Data.Nat using (ℕ; _+_; zero; suc; _⊔_)
   open import Data.List using (List; []; _∷_; [_]; _++_; foldl; foldr; map; scanl; scanr)
 
+  foldr-monoid : ∀ {A : Set}
+                 (_⊗_ : A → A → A)
+                 (e : A)
+                 → IsMonoid e _⊗_
+                 → ∀ (xs : List A) (y : A) → foldr _⊗_ y xs ≡ foldr _⊗_ e xs ⊗ y
+  foldr-monoid _⊗_ e ⊗-monoid [] y =
+    begin
+      foldr _⊗_ y []
+    ≡⟨⟩
+      y
+    ≡⟨ sym (identityˡ ⊗-monoid y) ⟩
+      (e ⊗ y)
+    ≡⟨⟩
+      foldr _⊗_ e [] ⊗ y
+    ∎
+  foldr-monoid _⊗_ e ⊗-monoid (x ∷ xs) y =
+    begin
+      foldr _⊗_ y (x ∷ xs)
+    ≡⟨⟩
+      x ⊗ (foldr _⊗_ y xs)
+    ≡⟨ cong (x ⊗_) (foldr-monoid _⊗_ e ⊗-monoid xs y) ⟩
+      x ⊗ (foldr _⊗_ e xs ⊗ y)
+    ≡⟨ sym(assoc (IsMonoid.is-semigroup ⊗-monoid) x (foldr _⊗_ e xs) y) ⟩
+      (x ⊗ foldr _⊗_ e xs) ⊗ y
+    ∎
+  
+  foldr-monoid-++ : ∀ {A : Set}
+                    (_⊗_ : A → A → A)
+                    (e : A)
+                    → IsMonoid e _⊗_
+                    → ∀ (xs ys : List A)
+                    → foldr _⊗_ e (xs ++ ys) ≡ foldr _⊗_ e xs ⊗ foldr _⊗_ e ys
+  foldr-monoid-++ _⊗_ e monoid-⊗ xs ys =
+    begin
+      foldr _⊗_ e (xs ++ ys)
+    ≡⟨ problem-2.foldr-++ _⊗_ e xs ys ⟩
+      foldr _⊗_ (foldr _⊗_ e ys) xs
+    ≡⟨ foldr-monoid _⊗_ e monoid-⊗ xs (foldr _⊗_ e ys) ⟩
+      foldr _⊗_ e xs ⊗ foldr _⊗_ e ys
+    ∎
+  
   map-compose : ∀ {A B C : Set} (f : A → B) (g : B → C) → (map g ∘ map f) ≡ map (g ∘ f)
   map-compose f g = extensionality (map-compose-p f g) where
     map-compose-p : ∀ {A B C : Set} (f : A → B) (g : B → C) (x : List A) → (map g ∘ map f) x ≡ map (g ∘ f) x
@@ -206,7 +248,41 @@ module MSS (
       ≡⟨⟩
         (g ∘ f) x ∷ map (g ∘ f) xs
       ∎
-    
+
+  reduce-promotion : ∀ {A : Set}
+                     (_⊕_ : A → A → A)
+                     (e : A)
+                     (p : IsMonoid e _⊕_)
+                     → foldr _⊕_ e ∘ foldr _++_ [] ≡ foldr _⊕_ e ∘ map (foldr _⊕_ e)
+  reduce-promotion _⊕_ e p = extensionality (reduce-promotion-x _⊕_ e p) where
+    reduce-promotion-x :
+                       ∀ {A : Set}
+                       (_⊕_ : A → A → A)
+                       (e : A)
+                       (p : IsMonoid e _⊕_)
+                       (x : List (List A))
+                       → (foldr _⊕_ e ∘ foldr _++_ []) x ≡ (foldr _⊕_ e ∘ map (foldr _⊕_ e)) x
+    reduce-promotion-x _⊕_ e p [] = refl
+    reduce-promotion-x _⊕_ e p (x ∷ xs) =
+      begin
+        (foldr _⊕_ e ∘ foldr _++_ []) (x ∷ xs)
+      ≡⟨⟩
+        (foldr _⊕_ e) (foldr _++_ [] (x ∷ xs))
+      ≡⟨⟩
+        (foldr _⊕_ e) (x ++ (foldr _++_ [] xs))
+      ≡⟨ foldr-monoid-++ _⊕_ e p x (foldr _++_ [] xs) ⟩
+        (foldr _⊕_ e x) ⊕ foldr _⊕_ e (foldr _++_ [] xs)
+      ≡⟨ cong(foldr _⊕_ e x ⊕_) (reduce-promotion-x _⊕_ e p xs) ⟩
+        (foldr _⊕_ e x) ⊕ (foldr _⊕_ e ∘ map (foldr _⊕_ e)) xs
+      ≡⟨ sym (foldr-monoid-++ _⊕_ e p x (map (foldr _⊕_ e) xs))⟩
+        (foldr _⊕_ e (x ++ (map (foldr _⊕_ e) xs)))
+      ≡⟨ foldr-monoid-++ _⊕_ e p x (map (foldr _⊕_ e) xs) ⟩
+        (foldr _⊕_ e x) ⊕ foldr _⊕_ e (map (foldr _⊕_ e) xs)
+      ≡⟨ refl ⟩
+        (foldr _⊕_ e ((foldr _⊕_ e x) ∷ (map (foldr _⊕_ e) xs)))
+      ≡⟨⟩
+        (foldr _⊕_ e ∘ map (foldr _⊕_ e)) (x ∷ xs)
+      ∎
   inits : ∀ {A : Set} → List A → List (List A)
   inits = scanl _++_ [] ∘ map [_]
 
@@ -256,7 +332,7 @@ module MSS (
       (foldr _⊔_) (foldr _⊔_ 0 (concat (map f xs))) (f x)
     ≡⟨ cong (λ y → foldr _⊔_ y (f x)) (reduce-maximum-xs f xs) ⟩
       (foldr _⊔_) ((maximum ∘ map (maximum ∘ f)) xs) (f x)
-    ≡⟨ ? ⟩
+    ≡⟨ {!!} ⟩
       (maximum ∘ map (maximum ∘ f)) (x ∷ xs)
     ∎
     
