@@ -325,6 +325,28 @@ module MSS (
               → (rdist : R-Dist _⊕_ _⊗_)
               → foldr _⊕_ e-⊕ ∘ map (foldr _⊗_ e-⊗) ∘ tails
                 ≡ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗
+  l-trans-rule : ∀ {A : Set}
+                   (_⊕_ : A → A → A)
+                   (e-⊕ : A)
+                   (_⊗_ : A → A → A)
+                   (e-⊗ : A)
+                 → (p : IsMonoid e-⊕ _⊕_)
+                 → (q : IsMonoid e-⊗ _⊗_)
+                 → (rdist : R-Dist _⊕_ _⊗_)
+                 → (t : A)
+                 → (xs : List A)
+                 → foldl (λ a b → (a ⊗ b) ⊕ e-⊗) (t ⊕ e-⊗) xs ≡
+                   (foldr _⊗_ e-⊗ (t ∷ xs)) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
+  l-trans-rule _⊕_ e-⊕ _⊗_ e-⊗ p q rdist t [] =
+    begin
+      t ⊕ e-⊗
+    ≡⟨ cong (_⊕ e-⊗) (sym(identityʳ q t)) ⟩
+      (t ⊗ e-⊗) ⊕ e-⊗
+    ≡⟨⟩
+      (foldr _⊗_ e-⊗ (t ∷ [])) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ []
+    ∎
+  l-trans-rule _⊕_ e-⊕ _⊗_ e-⊗ p q rdist t (x ∷ xs) = {!!}
+  
   horner-rule _⊕_ e-⊕ _⊗_ e-⊗ p q rdist = extensionality(horner-rule-x _⊕_ e-⊕ _⊗_ e-⊗ p q rdist)
     where
       horner-rule-x : ∀{A : Set}
@@ -358,23 +380,23 @@ module MSS (
         ≡⟨⟩
           foldr _⊕_ e-⊕ ((map (foldr _⊗_ e-⊗)) [ x ∷ xs ] ++
           (map (foldr _⊗_ e-⊗) ∘ tails) (xs))
-        ≡⟨ {!!} ⟩
-          foldr _⊕_ e-⊕ (map (foldr _⊗_ e-⊗) [ x ∷ xs ]) ⊗
+        ≡⟨ foldr-monoid-++ _⊕_ e-⊕ p ((map (foldr _⊗_ e-⊗)) [ x ∷ xs ]) ((map (foldr _⊗_ e-⊗) ∘ tails) (xs)) ⟩
+          foldr _⊕_ e-⊕ (map (foldr _⊗_ e-⊗) [ x ∷ xs ]) ⊕
           foldr _⊕_ e-⊕ ((map (foldr _⊗_ e-⊗) ∘ tails) (xs))
-        ≡⟨ cong ((foldr _⊕_ e-⊕ (map (foldr _⊗_ e-⊗) [ x ∷ xs ])) ⊗_)
+        ≡⟨ cong ((foldr _⊕_ e-⊕ (map (foldr _⊗_ e-⊗) [ x ∷ xs ])) ⊕_)
            (horner-rule-x _⊕_ e-⊕ _⊗_ e-⊗ p q rdist xs) ⟩
         ----------
-          foldr _⊕_ e-⊕ (map (foldr _⊗_ e-⊗) [ x ∷ xs ]) ⊗
+          foldr _⊕_ e-⊕ (map (foldr _⊗_ e-⊗) [ x ∷ xs ]) ⊕
           foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
         ≡⟨⟩
-          foldr _⊕_ e-⊕ [ foldr _⊗_ e-⊗ (x ∷ xs) ] ⊗
+          foldr _⊕_ e-⊕ [ foldr _⊗_ e-⊗ (x ∷ xs) ] ⊕
           foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
         ≡⟨ refl ⟩
-          ((foldr _⊗_ e-⊗ (x ∷ xs)) ⊕ e-⊕)⊗
+          ((foldr _⊗_ e-⊗ (x ∷ xs)) ⊕ e-⊕) ⊕
           foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
-        ≡⟨ cong (_⊗ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs))
+        ≡⟨ cong (_⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs))
            (identityʳ p (foldr _⊗_ e-⊗ (x ∷ xs))) ⟩
-          (foldr _⊗_ e-⊗ (x ∷ xs)) ⊗
+          (foldr _⊗_ e-⊗ (x ∷ xs)) ⊕
           foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
         ≡⟨ {!!} ⟩
           foldl (λ a b → (a ⊗ b) ⊕ e-⊗) (x ⊕ e-⊗) xs
