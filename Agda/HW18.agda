@@ -438,7 +438,7 @@ module MSS (
            (identityʳ p (foldr _⊗_ e-⊗ (x ∷ xs))) ⟩
           (foldr _⊗_ e-⊗ (x ∷ xs)) ⊕
           foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (xs)
-        ≡⟨ {!!} ⟩
+        ≡⟨ sym(l-trans-rule _⊕_ e-⊕ _⊗_ e-⊗ p q rdist x xs) ⟩
           foldl (λ a b → (a ⊗ b) ⊕ e-⊗) (x ⊕ e-⊗) xs
         ≡⟨ cong (λ t → foldl (λ a b → (a ⊗ b) ⊕ e-⊗) (t ⊕ e-⊗) xs) (sym(identityˡ q x)) ⟩
           foldl (λ a b → (a ⊗ b) ⊕ e-⊗) ((λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ x) xs
