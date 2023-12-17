@@ -445,7 +445,20 @@ module MSS (
         ≡⟨⟩
           foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (x ∷ xs)
         ∎
-  
+
+  acc-lemma : ∀ {A : Set}
+              (_⊕_ : A → A → A)
+              (e : A)
+            → scanl _⊕_ e ≡ map (foldl _⊕_ e) ∘ inits
+  acc-lemma _⊕_ e = extensionality(acclemma-x _⊕_ e) where
+            acclemma-x : ∀ {A : Set}
+                         (_⊕_ : A → A → A)
+                         (e : A)
+                         (xs : List A)
+                       → scanl _⊕_ e xs ≡ (map (foldl _⊕_ e) ∘ inits) xs
+            acclemma-x _⊕_ e [] = {!!}
+            acclemma-x _⊕_ e (x ∷ xs) = {!!}
+    
   mss : List ℕ → ℕ
   mss = maximum ∘ map sum ∘ segs
 
@@ -471,7 +484,7 @@ module MSS (
       maximum ∘ map (maximum ∘ map sum ∘ tails) ∘ inits
     ≡⟨ cong (λ x → maximum ∘ map x ∘ inits) (horner-rule _⊔_ 0 _+_ 0 monoid.ℕ-⊔-is-monoid monoid.ℕ-add-is-monoid +-distribʳ-⊔) ⟩
       maximum ∘ map (foldl maxadd 0) ∘ inits
-    ≡⟨ {!!} ⟩
+    ≡⟨ cong(maximum ∘_) (sym(acc-lemma maxadd 0)) ⟩
       maximum ∘ (scanl maxadd 0)
     ≡⟨ refl ⟩
       mss-fast
