@@ -279,6 +279,7 @@ module MSS (
       ≡⟨⟩
         (foldr _⊕_ e ∘ map (foldr _⊕_ e)) (x ∷ xs)
       ∎
+  
   inits : ∀ {A : Set} → List A → List (List A)
   inits = scanl _++_ [] ∘ map [_]
 
@@ -314,23 +315,6 @@ module MSS (
   
   mss-fast : List ℕ → ℕ
   mss-fast = maximum ∘ (scanl maxadd 0)
-  
-  reduce-maximum-xs : ∀ (f : ℕ → List ℕ) (xs : List ℕ) → (maximum ∘ concat ∘ map f) xs ≡ (maximum ∘ map (maximum ∘ f)) xs
-  reduce-maximum-xs f [] = refl
-  reduce-maximum-xs f (x ∷ xs) =
-    begin
-      (maximum ∘ concat ∘ map f) (x ∷ xs)
-    ≡⟨⟩
-      maximum (concat (f x ∷ (map f xs)))
-    ≡⟨⟩
-      (foldr _⊔_ 0) (concat (f x ∷ map f xs))
-    ≡⟨ problem-2.foldr-++ _⊔_ 0 (f x) (concat (map f xs)) ⟩
-      (foldr _⊔_) (foldr _⊔_ 0 (concat (map f xs))) (f x)
-    ≡⟨ cong (λ y → foldr _⊔_ y (f x)) (reduce-maximum-xs f xs) ⟩
-      (foldr _⊔_) ((maximum ∘ map (maximum ∘ f)) xs) (f x)
-    ≡⟨ {!!} ⟩
-      (maximum ∘ map (maximum ∘ f)) (x ∷ xs)
-    ∎
     
   derivation : mss ≡ mss-fast
   derivation =
@@ -342,7 +326,9 @@ module MSS (
       maximum ∘ concat ∘ map (map sum) ∘ map tails ∘ inits
     ≡⟨ cong (_∘ inits) (cong ((maximum ∘ concat) ∘_) (map-compose (tails) (map sum))) ⟩
       maximum ∘ concat ∘ map (map sum ∘ tails) ∘ inits
-    ≡⟨ {!!} ⟩
+    ≡⟨ cong (_∘ map(map sum ∘ tails) ∘ inits) (reduce-promotion _⊔_ 0 ℕ-⊔-is-monoid)  ⟩ -- ℕ-⊔-is-monoid
+      maximum ∘ map maximum ∘ map (map sum ∘ tails) ∘ inits
+    ≡⟨ cong (λ x → maximum ∘ x ∘ inits) (map-compose (map sum ∘ tails) maximum) ⟩
       maximum ∘ map (maximum ∘ map sum ∘ tails) ∘ inits
     ≡⟨ {!!} ⟩
       maximum ∘ map (foldl maxadd 0) ∘ inits
