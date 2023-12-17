@@ -273,10 +273,6 @@ module MSS (
       ≡⟨ foldr-monoid-++ _⊕_ e p x (foldr _++_ [] xs) ⟩
         (foldr _⊕_ e x) ⊕ foldr _⊕_ e (foldr _++_ [] xs)
       ≡⟨ cong(foldr _⊕_ e x ⊕_) (reduce-promotion-x _⊕_ e p xs) ⟩
-        (foldr _⊕_ e x) ⊕ (foldr _⊕_ e ∘ map (foldr _⊕_ e)) xs
-      ≡⟨ sym (foldr-monoid-++ _⊕_ e p x (map (foldr _⊕_ e) xs))⟩
-        (foldr _⊕_ e (x ++ (map (foldr _⊕_ e) xs)))
-      ≡⟨ foldr-monoid-++ _⊕_ e p x (map (foldr _⊕_ e) xs) ⟩
         (foldr _⊕_ e x) ⊕ foldr _⊕_ e (map (foldr _⊕_ e) xs)
       ≡⟨ refl ⟩
         (foldr _⊕_ e ((foldr _⊕_ e x) ∷ (map (foldr _⊕_ e) xs)))
