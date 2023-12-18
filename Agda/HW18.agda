@@ -315,10 +315,48 @@ module MSS (
   open import Data.Nat.Properties using (+-distribˡ-⊔; +-distribʳ-⊔)
   -- +-distribˡ-⊔ : ∀ x y z → x + (y ⊔ z) ≡ (x + y) ⊔ (x + z)
   -- +-distribʳ-⊔ : ∀ z x y → (x ⊔ y) + z ≡ (x + z) ⊔ (y + z)
-  
+
+  map-add : ∀ {A B : Set} (f : A → B) (xs ys : List A)
+    → map f (xs ++ ys) ≡ map f xs ++ map f ys
+  map-add f [] ys = refl
+  map-add f (x ∷ xs) ys =
+    begin
+      map f ((x ∷ xs) ++ ys)
+    ≡⟨⟩
+      map f (x ∷ (xs ++ ys))
+    ≡⟨⟩
+      f x ∷ map f (xs ++ ys)
+    ≡⟨ cong((f x) ∷_) (map-add f xs ys) ⟩
+      f x ∷ map f xs ++ map f ys
+    ≡⟨ refl ⟩
+      map f (x ∷ xs) ++ map f ys
+    ∎
+    
   map-promotion : ∀{A B : Set} (f : A → B) 
     → (map f) ∘ concat ≡ concat ∘ (map (map f))
-  map-promotion = {!!}
+  map-promotion f = extensionality(map-promotion-x f)
+    where
+      map-promotion-x : ∀{A B : Set}
+                        (f : A → B)
+                        (xs : List(List A))
+                      → ((map f) ∘ concat) xs ≡ (concat ∘ (map (map f))) xs
+      map-promotion-x f [] = refl
+      map-promotion-x f (x ∷ xs) =
+        begin
+          ((map f) ∘ concat) (x ∷ xs)
+        ≡⟨⟩
+          map f (concat (x ∷ xs))
+        ≡⟨⟩
+          map f (x ++ (concat xs))
+        ≡⟨ map-add f x (concat xs) ⟩
+          (map f x) ++ (map f (concat xs))
+        ≡⟨ cong ((map f x) ++_) (map-promotion-x f xs) ⟩
+          (map f x) ++ (concat ∘ (map (map f))) xs
+        ≡⟨⟩
+          concat((map f x) ∷ (map (map f) xs))
+        ≡⟨ refl ⟩
+          (concat ∘ (map (map f))) (x ∷ xs)
+        ∎
   
   horner-rule : ∀{A : Set}
                 (_⊕_ : A → A → A)
