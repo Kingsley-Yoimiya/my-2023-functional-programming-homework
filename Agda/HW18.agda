@@ -83,7 +83,7 @@ module problem-3 (
       → f ≡ g
   ) where
 
-  open import Data.List using (List; []; _∷_; _++_)
+  open import Data.List using (List; []; _∷_; _++_; head)
 
   reverse : ∀ {A : Set} → List A → List A
   reverse []       = []
@@ -185,7 +185,7 @@ module MSS (
   
   
   open import Data.Nat using (ℕ; _+_; zero; suc; _⊔_)
-  open import Data.List using (List; []; _∷_; [_]; _++_; foldl; foldr; map; scanl; scanr)
+  open import Data.List using (List; []; _∷_; [_]; _++_; foldl; foldr; map; scanl; scanr; head)
 
   foldr-monoid : ∀ {A : Set}
                  (_⊗_ : A → A → A)
@@ -289,10 +289,15 @@ module MSS (
 -- ∀ (a b c : A) → (a ⊕ b) ⊗ c ≡ (a ⊗ c) ⊕ (b ⊗ c)
   
   inits : ∀ {A : Set} → List A → List (List A)
-  inits = scanl _++_ [] ∘ map [_]
+  inits [] = [ [] ]
+  inits (x ∷ xs) = [] ∷ (map (x ∷_) (inits xs))
+  -- inits = scanl _++_ [] ∘ map [_]
 
   tails : ∀ {A : Set} → List A → List (List A)
-  tails = scanr _++_ [] ∘ map [_]
+  tails [] = [ [] ] 
+  tails (x ∷ xs) = [ x ∷ xs ] ++ tails xs 
+  -- scanr _++_ [] ∘ map [_]
+  -- the defination of tails is a smart but stupid in proof.
 
   concat : ∀ {A : Set} → List (List A) → List A
   concat = foldr _++_ []
@@ -386,7 +391,56 @@ module MSS (
     ≡⟨⟩
       (foldr _⊗_ e-⊗ (t ∷ (x ∷ xs))) ⊕ foldl (λ a b → (a ⊗ b) ⊕ e-⊗) e-⊗ (x ∷ xs)
     ∎
-  
+  {-
+  tails-rule : ∀{A : Set}
+               (t : A)
+               (xs : List A)
+             → tails (t ∷ xs) ≡ [ t ∷ xs ] ++ tails(xs)
+  tails-rule t [] = refl
+  tails-rule t (x ∷ xs) = extensionality(tails-rule-x t x xs) where
+    tails-rule-x : ∀{A : Set}
+                    (t : A)
+                    (x : A)
+                    (xs : List A)
+                  → tails (t ∷ x ∷ xs) ≡ [ t ∷ x ∷ xs ] ++ tails(x ∷ xs)
+    tails-rule-x t x [] =
+      begin
+        tails (t ∷ x ∷ [])
+      ≡⟨⟩
+        tails (t ∷ [ x ])
+      ≡⟨⟩
+        [ t ∷ [ x ] ] ++ tails [ x ]
+      ≡⟨⟩
+        [ t ∷ x ∷ [] ] ++ tails [ x ]
+      ≡⟨⟩
+        [ t ∷ x ∷ [] ] ++ tails(x ∷ [])
+      ∎
+    tails-rule-x t x (y ∷ ys) =
+      begin
+        tails (t ∷ x ∷ y ∷ ys)
+      ≡⟨⟩
+        tails (t ∷ (x ∷ y ∷ ys))
+      ≡⟨⟩
+        [ t ∷ (x ∷ y ∷ ys) ] ++ tails (x ∷ y ∷ ys)
+      ≡⟨ cong([ t ∷ _ ] ++_) (tails-rule-x x y ys) ⟩
+        [ t ∷ x ∷ y ∷ ys ] ++ tails (y ∷ ys)
+      ≡⟨⟩
+        [ t ∷ x ∷ y ∷ ys ] ++ tails (y ∷ ys)
+      ≡⟨⟩
+        [ t ∷ x ∷ y ∷ ys ] ++ tails (x ∷ y ∷ ys)
+      ∎
+  -}
+  {- tails-rule t (x ∷ xs) =
+    begin
+      (scanr _++_ [] ∘ map [_]) (t ∷ x ∷ xs)
+    ≡⟨ refl ⟩
+      scanr _++_ [] ([ [ t ] ] ++ ([ [ x ] ] ++ map [_] xs))
+    ≡⟨ cong(λ y1 → (scanl _++_ [] ([ [ t ] ] ++ y1)))(tails-rule x xs) ⟩
+      ?
+    ≡⟨ {!!} ⟩
+      [ t ∷ x ∷ xs ] ++ tails(x ∷ xs)
+    ∎
+  -}  
   horner-rule _⊕_ e-⊕ _⊗_ e-⊗ p q rdist = extensionality(horner-rule-x _⊕_ e-⊕ _⊗_ e-⊗ p q rdist)
     where
       horner-rule-x : ∀{A : Set}
@@ -415,7 +469,7 @@ module MSS (
       horner-rule-x _⊕_ e-⊕ _⊗_ e-⊗ p q rdist (x ∷ xs) =
         begin
           (foldr _⊕_ e-⊕ ∘ map (foldr _⊗_ e-⊗) ∘ tails) (x ∷ xs)
-        ≡⟨ {!!} ⟩
+        ≡⟨ refl ⟩
           (foldr _⊕_ e-⊕ ∘ map (foldr _⊗_ e-⊗)) ([ x ∷ xs ] ++ tails (xs))
         ≡⟨⟩
           foldr _⊕_ e-⊕ ((map (foldr _⊗_ e-⊗)) [ x ∷ xs ] ++
@@ -456,8 +510,25 @@ module MSS (
                          (e : A)
                          (xs : List A)
                        → scanl _⊕_ e xs ≡ (map (foldl _⊕_ e) ∘ inits) xs
-            acclemma-x _⊕_ e [] = {!!}
-            acclemma-x _⊕_ e (x ∷ xs) = {!!}
+            acclemma-x _⊕_ e [] = refl
+            acclemma-x _⊕_ e (x ∷ xs) =
+              begin
+                e ∷ scanl _⊕_ (e ⊕ x) xs
+              ≡⟨ cong(e ∷_) (acclemma-x _⊕_ (e ⊕ x) xs) ⟩
+                e ∷ (map (foldl _⊕_ (e ⊕ x)) ∘ inits) xs
+              ≡⟨⟩
+                e ∷ map (foldl _⊕_ (e ⊕ x)) (inits xs)
+              ≡⟨⟩
+                e ∷ map (foldl _⊕_ e ∘ (x ∷_)) (inits xs)
+              ≡⟨ cong(λ yy → (e ∷ yy (inits xs))) (sym(map-compose (x ∷_) (foldl _⊕_ e))) ⟩
+                e ∷ (map (foldl _⊕_ e) ∘ map (x ∷_)) (inits xs)
+              ≡⟨⟩
+                e ∷ (map (foldl _⊕_ e) (map (x ∷_) (inits xs)))
+              ≡⟨⟩
+                map (foldl _⊕_ e) ([] ∷ (map (x ∷_) (inits xs)))
+              ≡⟨ refl ⟩
+                (map (foldl _⊕_ e) ∘ inits) (x ∷ xs)
+              ∎
     
   mss : List ℕ → ℕ
   mss = maximum ∘ map sum ∘ segs
