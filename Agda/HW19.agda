@@ -1,4 +1,4 @@
-module HW18 where
+module HW19 where
 
 -- How to type those Unicode characters:
 -- →   \->
@@ -711,7 +711,7 @@ module BMF2-1 where
 
   -- 1. prove 'split' is a homomorphism
   split : ∀ {A : Set} → NList A → List A × A
-  split = reduce (λ _ z → z) ∘ map (_,_ [])
+  split = reduce {!!} ∘ map {!!}
 
   -- bonus: you may also want to prove the following theorems:
   --
