@@ -667,10 +667,12 @@ module MSS (
 
 module BMF2-1 where
 
-  open import Data.Product using (_×_; _,_; Σ-syntax; proj₁)
+  open import Data.Product using (_×_; _,_; Σ-syntax; proj₁; proj₂)
   open import Data.Nat using (ℕ; _+_; zero; suc)
   open import Data.List using (List; []; _∷_; [_]; _++_)
   open import Relation.Nullary using (¬_)
+  -- open import Relation.Nullary.Negation
+
 
   infixr 5 _∷′_
   data NList (A : Set) : Set where
@@ -708,11 +710,33 @@ module BMF2-1 where
       distrib : (x y : A) → f (x ⊕ y) ≡ f x ⊗ f y
 
   open IsHomomorphism
-
+  
+  infixr 5 _++′′_
+  
+  _++′′_ : ∀ {A : Set} → List A × A → List A × A → List A × A
+  (xs , xt) ++′′ (ys , yt) = (xs ++ [ xt ] ++ ys , yt)
+  
   -- 1. prove 'split' is a homomorphism
   split : ∀ {A : Set} → NList A → List A × A
-  split = reduce {!!} ∘ map {!!}
+  split = reduce (_++′′_) ∘ map ([] ,_)
 
+  ++∷-lem : ∀ {A : Set} (xt : A) (xs ys zs : List A) → xt ∷ (xs ++ ys) ++ zs ≡ xt ∷ xs ++ ys ++ zs
+  ++∷-lem xt [] ys zs = refl
+  ++∷-lem xt (x ∷ xs) ys zs rewrite ++∷-lem x xs ys zs = refl
+  
+  ++′′-assoc : ∀ {A : Set} (xs ys zs : List A × A) → (xs ++′′ ys) ++′′ zs ≡ xs ++′′ ys ++′′ zs
+  ++′′-assoc ( [] , x ) ys zs = refl
+  ++′′-assoc ( xt ∷ xs , x) ys zs rewrite ++′′-assoc (xs , x) ys zs | ++∷-lem xt xs (x ∷ proj₁ ys) (proj₂ ys ∷ proj₁ zs) = refl
+  
+  tuple-++-is-semigroup : ∀ {A : Set} → IsSemigroup {List A × A} _++′′_
+  tuple-++-is-semigroup .assoc = ++′′-assoc
+
+  ++split-distrib : ∀ {A : Set} → (xs ys : NList A) → split (xs ++′ ys) ≡ split xs ++′′ split ys
+  ++split-distrib [ x ]′ ys = refl
+  ++split-distrib (x ∷′ xs) ys rewrite ++split-distrib xs ys = refl
+  
+  split-++-is-homomorphism : ∀ {A : Set} → IsHomomorphism (NList-++′-is-semigroup { A }) (tuple-++-is-semigroup { A }) split
+  split-++-is-homomorphism .distrib = ++split-distrib
   -- bonus: you may also want to prove the following theorems:
   --
   --   _⊗_ : ∀ {A : Set} → List A × A → List A × A → List A × A
@@ -731,7 +755,7 @@ module BMF2-1 where
   -- to verify your 'split' is correct. after defining 'split', proving the following
   -- should be as easy as filling in 'refl'.
   split-is-correct : split (1 ∷′ 2 ∷′ 3 ∷′ [ 4 ]′) ≡ (1 ∷ 2 ∷ 3 ∷ [] , 4)
-  split-is-correct = {!!}
+  split-is-correct = refl
 
   -- bonus: find a proper way to prove your split is indeed correct:
   --
@@ -753,9 +777,28 @@ module BMF2-1 where
   -- (3) falsity '⊥' is an empty data type, it has no constructors ...
   -- (4) ... which means we can pattern match with absurd pattern '()'
 
+  ¬K : init (1 ∷′ 2 ∷′ [ 1 ]′) ≢ init (1 ∷′ 1 ∷′ [ 1 ]′)
+  ¬K ()
+
+  K₁ : ∀ {_⊗_} (m : IsSemigroup _⊗_)
+     → IsHomomorphism NList-++′-is-semigroup m (init {ℕ})
+     → init (1 ∷′ 2 ∷′ [ 1 ]′) ≡ init (1 ∷′ [ 2 ]′) ⊗ init ([ 1 ]′)
+  K₁ m p rewrite p .distrib (1 ∷′ [ 2 ]′)  ([ 1 ]′) = refl
+
+  K₂ : ∀ {_⊗_} (m : IsSemigroup _⊗_)
+     → IsHomomorphism NList-++′-is-semigroup m (init {ℕ})
+     → init (1 ∷′ 1 ∷′ [ 1 ]′) ≡ init (1 ∷′ [ 1 ]′) ⊗ init ([ 1 ]′)
+  K₂ m p rewrite p .distrib (1 ∷′ [ 1 ]′)  ([ 1 ]′) = refl
+
+  K :  ∀ {_⊗_} (m : IsSemigroup _⊗_)
+     → IsHomomorphism NList-++′-is-semigroup m (init {ℕ})
+     → init (1 ∷′ 2 ∷′ [ 1 ]′) ≡ init (1 ∷′ 1 ∷′ [ 1 ]′)
+  K m p rewrite K₁ m p | K₂ m p = refl
+  
   init-is-not-homomorphism : ∀ {_⊗_} (m : IsSemigroup _⊗_)
     → ¬ IsHomomorphism NList-++′-is-semigroup m (init {ℕ})
-  init-is-not-homomorphism {_⊗_} m H = {!!}
+  init-is-not-homomorphism {_⊗_} m H = ¬K (K m H)
+                          
 
   -- Hint: you might want to follow this guideline below if you get stuck.
   --
